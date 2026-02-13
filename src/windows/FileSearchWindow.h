@@ -1,7 +1,7 @@
 #ifndef FILESEARCHWINDOW_H
 #define FILESEARCHWINDOW_H
 
-#include "FramelessDialog.h"
+#include <QWidget>
 #include <QListWidget>
 #include <QLineEdit>
 #include <QPushButton>
@@ -119,22 +119,6 @@ private:
     QList<FileData> m_filesData;
     int m_visibleCount = 0;
     int m_hiddenCount = 0;
-};
-
-/**
- * @brief 文件查找窗口：封装了 FileSearchWidget
- */
-class FileSearchWindow : public FramelessDialog {
-    Q_OBJECT
-public:
-    explicit FileSearchWindow(QWidget* parent = nullptr);
-    ~FileSearchWindow();
-
-protected:
-    void resizeEvent(QResizeEvent* event) override;
-
-private:
-    FileSearchWidget* m_searchWidget;
 };
 
 #endif // FILESEARCHWINDOW_H

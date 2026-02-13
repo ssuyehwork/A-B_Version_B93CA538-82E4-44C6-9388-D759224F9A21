@@ -1,7 +1,7 @@
 #ifndef KEYWORDSEARCHWINDOW_H
 #define KEYWORDSEARCHWINDOW_H
 
-#include "FramelessDialog.h"
+#include <QWidget>
 #include "../widgets/ClickableLineEdit.h"
 #include <QLineEdit>
 #include <QPushButton>
@@ -61,22 +61,6 @@ private:
 
     QString m_lastBackupPath;
     QStringList m_ignoreDirs;
-};
-
-/**
- * @brief 关键字搜索窗口：封装了 KeywordSearchWidget
- */
-class KeywordSearchWindow : public FramelessDialog {
-    Q_OBJECT
-public:
-    explicit KeywordSearchWindow(QWidget* parent = nullptr);
-    ~KeywordSearchWindow();
-
-protected:
-    void hideEvent(QHideEvent* event) override;
-
-private:
-    KeywordSearchWidget* m_searchWidget;
 };
 
 #endif // KEYWORDSEARCHWINDOW_H

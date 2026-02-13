@@ -893,7 +893,7 @@ void FileSearchWidget::onEditFile() {
     }
     if (paths.isEmpty()) return;
 
-    QSettings settings("SearchTool", "ExternalEditor");
+    QSettings settings("SearchTool_Standalone", "ExternalEditor");
     QString editorPath = settings.value("EditorPath").toString();
 
     if (editorPath.isEmpty() || !QFile::exists(editorPath)) {
@@ -1057,7 +1057,63 @@ void FileSearchWidget::onMergeFiles(const QStringList& filePaths, const QString&
         QString relPath = QDir(rootPath).relativeFilePath(fp);
         QString lang = getFileLanguage(fp);
 
-        out << "
-#include "FileSearchWindow.moc"
+        out << "## 文件: `" << relPath << "`\n\n";
+        out << "```" << lang << "\n";
+
+        QFile inFile(fp);
+        if (inFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QByteArray content = inFile.readAll();
+            out << QString::fromUtf8(content);
+            if (!content.endsWith('\n')) out << "\n";
+        } else {
+            out << "# 读取文件失败\n";
+        }
+        out << "```\n\n";
+    }
+
+    outFile.close();
+
+    QString msg = QString("✔ 已保存: %1 (%2个文件)").arg(outName).arg(filePaths.size());
+    QToolTip::showText(QCursor::pos(), StringUtils::wrapToolTip(QString("<b style='color: #2ecc71;'>%1</b>").arg(msg)), this, {}, 3000);
+}
+
+void FileSearchWidget::onMergeSelectedFiles() {
+    auto selectedItems = m_fileList->selectedItems();
+    if (selectedItems.isEmpty()) return;
+
+    QStringList paths;
+    for (auto* item : std::as_const(selectedItems)) {
+        QString p = item->data(Qt::UserRole).toString();
+        if (!p.isEmpty() && isSupportedFile(p)) {
+            paths << p;
+        }
+    }
+
+    if (paths.isEmpty()) {
+        QToolTip::showText(QCursor::pos(), StringUtils::wrapToolTip("<b style='color:#e74c3c;'>✖ 选中项中没有支持的文件类型</b>"), this, {}, 2000);
+        return;
+    }
+
+    onMergeFiles(paths, m_pathInput->text().trimmed());
+}
+
+void FileSearchWidget::onMergeFolderContent() {
+    QString rootPath = m_pathInput->text().trimmed();
+    if (rootPath.isEmpty() || !QDir(rootPath).exists()) return;
+
+    QStringList paths;
+    for (const auto& data : std::as_const(m_filesData)) {
+        if (!data.isHidden && isSupportedFile(data.path)) {
+            paths << data.path;
+        }
+    }
+
+    if (paths.isEmpty()) {
+        QToolTip::showText(QCursor::pos(), StringUtils::wrapToolTip("<b style='color:#e74c3c;'>✖ 目录中没有支持的文件类型</b>"), this, {}, 2000);
+        return;
+    }
+
+    onMergeFiles(paths, rootPath);
+}
 
 #include "FileSearchWindow.moc"
