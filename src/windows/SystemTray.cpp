@@ -8,7 +8,7 @@ SystemTray::SystemTray(QObject* parent) : QObject(parent) {
     
     // 使用应用图标作为托盘图标
     m_trayIcon->setIcon(QIcon(":/icons/app_icon.ico"));
-    m_trayIcon->setToolTip("高级搜索工具");
+    m_trayIcon->setToolTip("高级搜索工具 (独立版)");
 
     m_menu = new QMenu();
     m_menu->setWindowFlags(m_menu->windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);

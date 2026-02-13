@@ -238,7 +238,7 @@ void FramelessDialog::showEvent(QShowEvent* event) {
 
 void FramelessDialog::loadWindowSettings() {
     if (objectName().isEmpty()) return;
-    QSettings settings("SearchTool", "WindowStates");
+    QSettings settings("SearchTool_Standalone", "WindowStates");
     bool stay = settings.value(objectName() + "/StayOnTop", false).toBool();
     
     m_isStayOnTop = stay;
@@ -252,7 +252,7 @@ void FramelessDialog::loadWindowSettings() {
 
 void FramelessDialog::saveWindowSettings() {
     if (objectName().isEmpty()) return;
-    QSettings settings("SearchTool", "WindowStates");
+    QSettings settings("SearchTool_Standalone", "WindowStates");
     settings.setValue(objectName() + "/StayOnTop", m_isStayOnTop);
 }
 

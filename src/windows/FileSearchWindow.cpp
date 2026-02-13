@@ -893,7 +893,7 @@ void FileSearchWidget::onEditFile() {
     }
     if (paths.isEmpty()) return;
 
-    QSettings settings("SearchTool", "ExternalEditor");
+    QSettings settings("SearchTool_Standalone", "ExternalEditor");
     QString editorPath = settings.value("EditorPath").toString();
 
     if (editorPath.isEmpty() || !QFile::exists(editorPath)) {
@@ -1128,7 +1128,7 @@ void FileSearchWidget::onMergeFolderContent() {
 
 void FileSearchWidget::addHistoryEntry(const QString& path) {
     if (path.isEmpty() || !QDir(path).exists()) return;
-    QSettings settings("SearchTool", "FileSearchHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(path);
     history.prepend(path);
@@ -1137,17 +1137,17 @@ void FileSearchWidget::addHistoryEntry(const QString& path) {
 }
 
 QStringList FileSearchWidget::getHistory() const {
-    QSettings settings("SearchTool", "FileSearchHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchHistory");
     return settings.value("list").toStringList();
 }
 
 void FileSearchWidget::clearHistory() {
-    QSettings settings("SearchTool", "FileSearchHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchHistory");
     settings.setValue("list", QStringList());
 }
 
 void FileSearchWidget::removeHistoryEntry(const QString& path) {
-    QSettings settings("SearchTool", "FileSearchHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(path);
     settings.setValue("list", history);
@@ -1155,7 +1155,7 @@ void FileSearchWidget::removeHistoryEntry(const QString& path) {
 
 void FileSearchWidget::addSearchHistoryEntry(const QString& text) {
     if (text.isEmpty()) return;
-    QSettings settings("SearchTool", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchFilenameHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(text);
     history.prepend(text);
@@ -1164,25 +1164,25 @@ void FileSearchWidget::addSearchHistoryEntry(const QString& text) {
 }
 
 QStringList FileSearchWidget::getSearchHistory() const {
-    QSettings settings("SearchTool", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchFilenameHistory");
     return settings.value("list").toStringList();
 }
 
 void FileSearchWidget::removeSearchHistoryEntry(const QString& text) {
-    QSettings settings("SearchTool", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchFilenameHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(text);
     settings.setValue("list", history);
 }
 
 void FileSearchWidget::clearSearchHistory() {
-    QSettings settings("SearchTool", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchFilenameHistory");
     settings.setValue("list", QStringList());
 }
 
 void FileSearchWidget::addExtHistoryEntry(const QString& text) {
     if (text.isEmpty()) return;
-    QSettings settings("SearchTool", "FileSearchExtHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchExtHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(text);
     history.prepend(text);
@@ -1191,19 +1191,19 @@ void FileSearchWidget::addExtHistoryEntry(const QString& text) {
 }
 
 QStringList FileSearchWidget::getExtHistory() const {
-    QSettings settings("SearchTool", "FileSearchExtHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchExtHistory");
     return settings.value("list").toStringList();
 }
 
 void FileSearchWidget::removeExtHistoryEntry(const QString& text) {
-    QSettings settings("SearchTool", "FileSearchExtHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchExtHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(text);
     settings.setValue("list", history);
 }
 
 void FileSearchWidget::clearExtHistory() {
-    QSettings settings("SearchTool", "FileSearchExtHistory");
+    QSettings settings("SearchTool_Standalone", "FileSearchExtHistory");
     settings.setValue("list", QStringList());
 }
 
@@ -1265,7 +1265,7 @@ void FileSearchWidget::addFavorite(const QString& path, bool pinned) {
 }
 
 void FileSearchWidget::loadFavorites() {
-    QSettings settings("SearchTool", "FileSearchFavorites");
+    QSettings settings("SearchTool_Standalone", "FileSearchFavorites");
     QVariant val = settings.value("list");
     if (val.typeId() == QMetaType::QStringList) {
         QStringList oldFavs = val.toStringList();
@@ -1301,7 +1301,7 @@ void FileSearchWidget::saveFavorites() {
         map["pinned"] = m_sidebar->item(i)->data(Qt::UserRole + 1).toBool();
         favs << map;
     }
-    QSettings settings("SearchTool", "FileSearchFavorites");
+    QSettings settings("SearchTool_Standalone", "FileSearchFavorites");
     settings.setValue("list", favs);
 }
 
@@ -1309,7 +1309,7 @@ void FileSearchWidget::onFavoriteFile() {
     auto selectedItems = m_fileList->selectedItems();
     if (selectedItems.isEmpty()) return;
 
-    QSettings settings("SearchTool", "FileSearchFileFavorites");
+    QSettings settings("SearchTool_Standalone", "FileSearchFileFavorites");
     QVariantList favs = settings.value("list").toList();
 
     for (auto* item : selectedItems) {
@@ -1350,7 +1350,7 @@ void FileSearchWidget::removeFileFavorite() {
     auto selectedItems = m_fileFavoritesList->selectedItems();
     if (selectedItems.isEmpty()) return;
 
-    QSettings settings("SearchTool", "FileSearchFileFavorites");
+    QSettings settings("SearchTool_Standalone", "FileSearchFileFavorites");
     QVariantList favs = settings.value("list").toList();
 
     for (auto* item : selectedItems) {
@@ -1414,7 +1414,7 @@ void FileSearchWidget::saveFileFavorites() {
 
 void FileSearchWidget::refreshFileFavoritesList(const QString& filterPath) {
     m_fileFavoritesList->clear();
-    QSettings settings("SearchTool", "FileSearchFileFavorites");
+    QSettings settings("SearchTool_Standalone", "FileSearchFileFavorites");
     QVariantList favs = settings.value("list").toList();
 
     for (const auto& v : favs) {
@@ -1457,8 +1457,9 @@ bool FileSearchWidget::eventFilter(QObject* watched, QEvent* event) {
 // FileSearchWindow 实现
 // ----------------------------------------------------------------------------
 FileSearchWindow::FileSearchWindow(QWidget* parent) 
-    : FramelessDialog("查找文件", parent) 
+    : FramelessDialog("查找文件 (独立版)", parent)
 {
+    setObjectName("FileSearchWindow_Standalone");
     resize(1000, 680);
     m_searchWidget = new FileSearchWidget(m_contentArea);
     m_mainLayout->addWidget(m_searchWidget);
