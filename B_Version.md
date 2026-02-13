@@ -510,7 +510,7 @@ void ResizeHandle::mouseMoveEvent(QMouseEvent* event) {
 // FileSearchWindow 实现
 // ----------------------------------------------------------------------------
 FileSearchWindow::FileSearchWindow(QWidget* parent) 
-    : FramelessDialog("查找文件", parent) 
+    : FramelessDialog("搜索文件", parent)
 {
     resize(1000, 680);
     setupStyles();
@@ -961,7 +961,7 @@ void FileSearchWindow::onEditFile() {
     }
     if (paths.isEmpty()) return;
 
-    QSettings settings("RapidNotes", "ExternalEditor");
+    QSettings settings("SearchTool", "ExternalEditor");
     QString editorPath = settings.value("EditorPath").toString();
 
     // 尝试寻找 Notepad++
@@ -1210,7 +1210,7 @@ void FileSearchWindow::resizeEvent(QResizeEvent* event) {
 // ----------------------------------------------------------------------------
 void FileSearchWindow::addHistoryEntry(const QString& path) {
     if (path.isEmpty() || !QDir(path).exists()) return;
-    QSettings settings("RapidNotes", "FileSearchHistory");
+    QSettings settings("SearchTool", "FileSearchHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(path);
     history.prepend(path);
@@ -1219,17 +1219,17 @@ void FileSearchWindow::addHistoryEntry(const QString& path) {
 }
 
 QStringList FileSearchWindow::getHistory() const {
-    QSettings settings("RapidNotes", "FileSearchHistory");
+    QSettings settings("SearchTool", "FileSearchHistory");
     return settings.value("list").toStringList();
 }
 
 void FileSearchWindow::clearHistory() {
-    QSettings settings("RapidNotes", "FileSearchHistory");
+    QSettings settings("SearchTool", "FileSearchHistory");
     settings.setValue("list", QStringList());
 }
 
 void FileSearchWindow::removeHistoryEntry(const QString& path) {
-    QSettings settings("RapidNotes", "FileSearchHistory");
+    QSettings settings("SearchTool", "FileSearchHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(path);
     settings.setValue("list", history);
@@ -1237,7 +1237,7 @@ void FileSearchWindow::removeHistoryEntry(const QString& path) {
 
 void FileSearchWindow::addSearchHistoryEntry(const QString& text) {
     if (text.isEmpty()) return;
-    QSettings settings("RapidNotes", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool", "FileSearchFilenameHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(text);
     history.prepend(text);
@@ -1246,19 +1246,19 @@ void FileSearchWindow::addSearchHistoryEntry(const QString& text) {
 }
 
 QStringList FileSearchWindow::getSearchHistory() const {
-    QSettings settings("RapidNotes", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool", "FileSearchFilenameHistory");
     return settings.value("list").toStringList();
 }
 
 void FileSearchWindow::removeSearchHistoryEntry(const QString& text) {
-    QSettings settings("RapidNotes", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool", "FileSearchFilenameHistory");
     QStringList history = settings.value("list").toStringList();
     history.removeAll(text);
     settings.setValue("list", history);
 }
 
 void FileSearchWindow::clearSearchHistory() {
-    QSettings settings("RapidNotes", "FileSearchFilenameHistory");
+    QSettings settings("SearchTool", "FileSearchFilenameHistory");
     settings.setValue("list", QStringList());
 }
 
@@ -1319,7 +1319,7 @@ void FileSearchWindow::addFavorite(const QString& path) {
 }
 
 void FileSearchWindow::loadFavorites() {
-    QSettings settings("RapidNotes", "FileSearchFavorites");
+    QSettings settings("SearchTool", "FileSearchFavorites");
     QStringList favs = settings.value("list").toStringList();
     for (const QString& path : std::as_const(favs)) {
         if (QDir(path).exists()) {
@@ -1341,7 +1341,7 @@ void FileSearchWindow::saveFavorites() {
     for (int i = 0; i < m_sidebar->count(); ++i) {
         favs << m_sidebar->item(i)->data(Qt::UserRole).toString();
     }
-    QSettings settings("RapidNotes", "FileSearchFavorites");
+    QSettings settings("SearchTool", "FileSearchFavorites");
     settings.setValue("list", favs);
 }
 
@@ -2825,7 +2825,7 @@ bool FileSearchWidget::eventFilter(QObject* watched, QEvent* event) {
 // FileSearchWindow 实现
 // ----------------------------------------------------------------------------
 FileSearchWindow::FileSearchWindow(QWidget* parent) 
-    : FramelessDialog("查找文件", parent) 
+    : FramelessDialog("搜索文件", parent)
 {
     resize(1000, 680);
     m_searchWidget = new FileSearchWidget(m_contentArea);
@@ -3018,7 +3018,7 @@ FloatingBall::FloatingBall(QWidget* parent)
 
     restorePosition();
     
-    QSettings settings("RapidNotes", "FloatingBall");
+    QSettings settings("SearchTool", "FloatingBall");
     QString savedSkin = settings.value("skin", "mocha").toString();
     switchSkin(savedSkin);
 }
@@ -3363,7 +3363,7 @@ QIcon FloatingBall::generateBallIcon() {
 void FloatingBall::switchSkin(const QString& name) {
     m_skinName = name;
     
-    QSettings settings("RapidNotes", "FloatingBall");
+    QSettings settings("SearchTool", "FloatingBall");
     settings.setValue("skin", name);
     
     update();
@@ -3436,13 +3436,13 @@ void FloatingBall::updateParticles() {
 }
 
 void FloatingBall::savePosition() {
-    QSettings settings("RapidNotes", "FloatingBall");
+    QSettings settings("SearchTool", "FloatingBall");
     settings.setValue("pos", pos());
     settings.setValue("visible", isVisible());
 }
 
 void FloatingBall::restorePosition() {
-    QSettings settings("RapidNotes", "FloatingBall");
+    QSettings settings("SearchTool", "FloatingBall");
     if (settings.value("visible", true).toBool()) {
         show();
     } else {
@@ -5063,7 +5063,7 @@ void KeywordSearchWidget::onShowHistory() {
 // ----------------------------------------------------------------------------
 // KeywordSearchWindow 实现
 // ----------------------------------------------------------------------------
-KeywordSearchWindow::KeywordSearchWindow(QWidget* parent) : FramelessDialog("查找关键字", parent) {
+KeywordSearchWindow::KeywordSearchWindow(QWidget* parent) : FramelessDialog("搜索关键字", parent) {
     resize(1000, 700);
     m_searchWidget = new KeywordSearchWidget(m_contentArea);
     auto* layout = new QVBoxLayout(m_contentArea);
@@ -5224,9 +5224,9 @@ int main(int argc, char *argv[]) {
 #include <QVBoxLayout>
 
 SearchAppWindow::SearchAppWindow(QWidget* parent) 
-    : FramelessDialog("高级搜索工具", parent) 
+    : FramelessDialog("搜索主程序", parent)
 {
-    setObjectName("SearchAppWindow");
+    setObjectName("SearchTool_SearchAppWindow");
     resize(1100, 750);
     setupStyles();
     initUI();
@@ -5662,7 +5662,7 @@ public:
      */
     static void recordRecentCategory(int catId) {
         if (catId <= 0) return;
-        QSettings settings("RapidNotes", "QuickWindow");
+        QSettings settings("SearchTool", "QuickWindow");
         QVariantList recentCats = settings.value("recentCategories").toList();
         
         // 转换为 int 列表方便操作
@@ -5685,7 +5685,7 @@ public:
      * @brief 获取最近访问或使用的分类 ID 列表
      */
     static QVariantList getRecentCategories() {
-        QSettings settings("RapidNotes", "QuickWindow");
+        QSettings settings("SearchTool", "QuickWindow");
         return settings.value("recentCategories").toList();
     }
 };
@@ -5965,7 +5965,7 @@ SystemTray::SystemTray(QObject* parent) : QObject(parent) {
     
     // 复刻 Python 版：使用渲染的悬浮球作为托盘图标
     m_trayIcon->setIcon(FloatingBall::generateBallIcon());
-    m_trayIcon->setToolTip("快速笔记");
+    m_trayIcon->setToolTip("搜索工具");
 
     m_menu = new QMenu();
     m_menu->setStyleSheet(
@@ -6029,7 +6029,7 @@ SystemTray::SystemTray(QObject* parent) : QObject(parent) {
     
     // 使用应用图标作为托盘图标
     m_trayIcon->setIcon(QIcon(":/icons/app_icon.ico"));
-    m_trayIcon->setToolTip("高级搜索工具");
+    m_trayIcon->setToolTip("搜索主程序");
 
     m_menu = new QMenu();
     m_menu->setWindowFlags(m_menu->windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
@@ -6137,8 +6137,8 @@ private:
 #include <QDialog>
 #include <QWindow>
 
-Toolbox::Toolbox(QWidget* parent) : FramelessDialog("工具箱", parent) {
-    setObjectName("ToolboxLauncher");
+Toolbox::Toolbox(QWidget* parent) : FramelessDialog("搜索工具箱", parent) {
+    setObjectName("SearchTool_ToolboxLauncher");
     
     // [CRITICAL] 强制开启非活动窗口的 ToolTip 显示。
     setAttribute(Qt::WA_AlwaysShowToolTips);
@@ -6218,13 +6218,13 @@ void Toolbox::initUI() {
     addTool("immediate_ocr", "文字识别", "screenshot_ocr", "#3498db", &Toolbox::startOCRRequested);
     addTool("tag", "标签管理", "tag", "#f1c40f", &Toolbox::showTagManagerRequested);
     addTool("file_storage", "存储文件", "file_managed", "#e67e22", &Toolbox::showFileStorageRequested);
-    addTool("file_search", "查找文件", "search", "#95a5a6", &Toolbox::showFileSearchRequested);
-    addTool("keyword_search", "查找关键字", "find_keyword", "#3498db", &Toolbox::showKeywordSearchRequested);
+    addTool("file_search", "搜索文件", "search", "#95a5a6", &Toolbox::showFileSearchRequested);
+    addTool("keyword_search", "搜索关键字", "find_keyword", "#3498db", &Toolbox::showKeywordSearchRequested);
     addTool("color_picker", "吸取颜色", "paint_bucket", "#ff6b81", &Toolbox::showColorPickerRequested);
     addTool("immediate_color_picker", "立即取色", "screen_picker", "#ff4757", &Toolbox::startColorPickerRequested);
     addTool("screenshot", "截图", "camera", "#e74c3c", &Toolbox::screenshotRequested);
     addTool("main_window", "主界面", "maximize", "#4FACFE", &Toolbox::showMainWindowRequested);
-    addTool("quick_window", "快速笔记", "zap", "#F1C40F", &Toolbox::showQuickWindowRequested);
+    addTool("quick_window", "搜索工具", "zap", "#F1C40F", &Toolbox::showQuickWindowRequested);
 
     m_btnRotate = createToolButton("切换布局", "rotate", "#aaaaaa");
     connect(m_btnRotate, &QPushButton::clicked, this, &Toolbox::toggleOrientation);
@@ -6551,7 +6551,7 @@ void Toolbox::showConfigPanel() {
 }
 
 void Toolbox::loadSettings() {
-    QSettings settings("RapidNotes", "Toolbox");
+    QSettings settings("SearchTool", "Toolbox");
     m_orientation = (Orientation)settings.value("orientation", (int)Orientation::Vertical).toInt();
     
     if (settings.value("isOpen", false).toBool()) {
@@ -6576,7 +6576,7 @@ void Toolbox::loadSettings() {
 }
 
 void Toolbox::saveSettings() {
-    QSettings settings("RapidNotes", "Toolbox");
+    QSettings settings("SearchTool", "Toolbox");
     settings.setValue("orientation", (int)m_orientation);
     settings.setValue("isOpen", isVisible());
     
