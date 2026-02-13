@@ -257,6 +257,8 @@ void FramelessDialog::saveWindowSettings() {
 }
 
 FramelessDialog::ResizeEdge FramelessDialog::getEdge(const QPoint& pos) {
+    if (isMaximized()) return None;
+
     int x = pos.x();
     int y = pos.y();
     int w = width();
@@ -264,9 +266,11 @@ FramelessDialog::ResizeEdge FramelessDialog::getEdge(const QPoint& pos) {
     int edge = None;
 
     // 考虑到阴影边距（20px），实际可视边缘在 20 像素处
-    // 但为了方便拖动，我们检测可视容器（DialogContainer）的边缘
     int margin = 20; 
     int tolerance = 8; // 触发缩放的感应宽度
+
+    // 只有当坐标在合理的窗口范围内时才触发
+    if (x < 0 || x > w || y < 0 || y > h) return None;
 
     if (x >= margin - tolerance && x <= margin + tolerance) edge |= Left;
     if (x >= w - margin - tolerance && x <= w - margin + tolerance) edge |= Right;
@@ -277,6 +281,11 @@ FramelessDialog::ResizeEdge FramelessDialog::getEdge(const QPoint& pos) {
 }
 
 void FramelessDialog::updateCursor(ResizeEdge edge) {
+    if (isMaximized()) {
+        if (cursor().shape() != Qt::ArrowCursor) setCursor(Qt::ArrowCursor);
+        return;
+    }
+
     switch (edge) {
         case Top:
         case Bottom: setCursor(Qt::SizeVerCursor); break;
@@ -286,22 +295,22 @@ void FramelessDialog::updateCursor(ResizeEdge edge) {
         case BottomRight: setCursor(Qt::SizeFDiagCursor); break;
         case TopRight:
         case BottomLeft: setCursor(Qt::SizeBDiagCursor); break;
-        default: setCursor(Qt::ArrowCursor); break;
+        default:
+            if (cursor().shape() != Qt::ArrowCursor) setCursor(Qt::ArrowCursor);
+            break;
     }
 }
 
 void FramelessDialog::mousePressEvent(QMouseEvent* event) {
     if (event->button() == Qt::LeftButton) {
         if (!isMaximized()) {
-            m_resizeEdge = getEdge(event->pos());
+            QPoint pos = mapFromGlobal(event->globalPosition().toPoint());
+            m_resizeEdge = getEdge(pos);
             if (m_resizeEdge != None) {
                 m_isResizing = true;
             } else {
                 m_dragPos = event->globalPosition().toPoint() - frameGeometry().topLeft();
             }
-        } else {
-            // 如果最大化了，只允许拖动，但实际上最大化通常不允许拖动，或者拖动后还原
-            // 这里我们保持简单，最大化时不处理拖动（除非我们要实现拖动标题栏还原）
         }
         event->accept();
     }
@@ -309,9 +318,12 @@ void FramelessDialog::mousePressEvent(QMouseEvent* event) {
 
 void FramelessDialog::mouseMoveEvent(QMouseEvent* event) {
     if (isMaximized()) {
+        if (cursor().shape() != Qt::ArrowCursor) setCursor(Qt::ArrowCursor);
         QDialog::mouseMoveEvent(event);
         return;
     }
+
+    QPoint pos = mapFromGlobal(event->globalPosition().toPoint());
 
     if (m_isResizing) {
         QRect rect = geometry();
@@ -341,7 +353,7 @@ void FramelessDialog::mouseMoveEvent(QMouseEvent* event) {
     } else if (event->buttons() & Qt::LeftButton) {
         move(event->globalPosition().toPoint() - m_dragPos);
     } else {
-        updateCursor(getEdge(event->pos()));
+        updateCursor(getEdge(pos));
     }
     event->accept();
 }
