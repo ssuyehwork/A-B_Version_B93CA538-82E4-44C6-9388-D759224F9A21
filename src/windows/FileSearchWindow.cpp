@@ -754,6 +754,7 @@ void FileSearchWidget::initUI() {
     m_fileFavoritesList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_fileFavoritesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_fileFavoritesList->setMinimumWidth(200);
+    m_fileFavoritesList->setSelectionMode(QAbstractItemView::ExtendedSelection);
     m_fileFavoritesList->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(favList, &FileFavoriteListWidget::filesDropped, this, [this](const QStringList& paths){
         QSettings settings("SearchTool_Standalone", "FileFavorites");
@@ -916,7 +917,6 @@ void FileSearchWidget::showFileContextMenu(const QPoint& pos) {
     if (paths.isEmpty()) return;
 
     QMenu menu(this);
-    menu.setWindowFlags(menu.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     menu.setAttribute(Qt::WA_TranslucentBackground);
     
     if (selectedItems.size() == 1) {
@@ -1095,9 +1095,35 @@ void FileSearchWidget::onMergeFiles(const QStringList& filePaths, const QString&
         return;
     }
 
+    // 判断文件是否来自不同文件夹
+    bool differentFolders = false;
+    if (filePaths.size() > 1) {
+        QString firstDir = QFileInfo(filePaths.first()).absolutePath();
+        for (const QString& fp : filePaths) {
+            if (QFileInfo(fp).absolutePath() != firstDir) {
+                differentFolders = true;
+                break;
+            }
+        }
+    }
+
+    QString actualRoot = rootPath;
+    if (actualRoot.isEmpty() && !filePaths.isEmpty()) {
+        actualRoot = QFileInfo(filePaths.first()).absolutePath();
+    }
+
+    QString targetDir = actualRoot;
+    if (differentFolders && !actualRoot.isEmpty()) {
+        QDir root(actualRoot);
+        if (!root.exists("Combine")) {
+            root.mkdir("Combine");
+        }
+        targetDir = root.absoluteFilePath("Combine");
+    }
+
     QString ts = QDateTime::currentDateTime().toString("yyyyMMdd_HHmmss");
     QString outName = QString("%1_code_export.md").arg(ts);
-    QString outPath = QDir(rootPath).filePath(outName);
+    QString outPath = QDir(targetDir).filePath(outName);
 
     QFile outFile(outPath);
     if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -1276,7 +1302,6 @@ void FileSearchWidget::showSidebarContextMenu(const QPoint& pos) {
     m_sidebar->setCurrentItem(item);
 
     QMenu menu(this);
-    menu.setWindowFlags(menu.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     menu.setAttribute(Qt::WA_TranslucentBackground);
 
     bool isPinned = item->data(Qt::UserRole + 1).toBool();
@@ -1361,10 +1386,38 @@ void FileSearchWidget::removeFileFavorite() {
 }
 
 void FileSearchWidget::showFileFavoriteContextMenu(const QPoint& pos) {
-    QListWidgetItem* item = m_fileFavoritesList->itemAt(pos);
-    if (!item) return;
+    auto selectedItems = m_fileFavoritesList->selectedItems();
+    if (selectedItems.isEmpty()) {
+        auto* item = m_fileFavoritesList->itemAt(pos);
+        if (item) {
+            item->setSelected(true);
+            selectedItems << item;
+        }
+    }
+    if (selectedItems.isEmpty()) return;
+
     QMenu menu(this);
-    menu.addAction(IconHelper::getIcon("close", "#E74C3C"), "取消收藏", this, &FileSearchWidget::removeFileFavorite);
+    menu.setAttribute(Qt::WA_TranslucentBackground);
+
+    QString removeText = selectedItems.size() > 1 ? QString("取消收藏 (%1)").arg(selectedItems.size()) : "取消收藏";
+    menu.addAction(IconHelper::getIcon("close", "#E74C3C"), removeText, this, &FileSearchWidget::removeFileFavorite);
+
+    menu.addSeparator();
+    menu.addAction(IconHelper::getIcon("merge", "#3498DB"), "合并选中内容", [this, selectedItems](){
+        QStringList paths;
+        for (auto* item : selectedItems) {
+            QString p = item->data(Qt::UserRole).toString();
+            if (!p.isEmpty() && isSupportedFile(p)) {
+                paths << p;
+            }
+        }
+        if (paths.isEmpty()) {
+            QToolTip::showText(QCursor::pos(), StringUtils::wrapToolTip("<b style='color:#e74c3c;'>✖ 选中项中没有支持的文件类型</b>"), this, {}, 2000);
+            return;
+        }
+        onMergeFiles(paths, m_pathInput->text().trimmed());
+    });
+
     menu.exec(m_fileFavoritesList->mapToGlobal(pos));
 }
 

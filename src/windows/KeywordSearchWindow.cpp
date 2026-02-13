@@ -599,7 +599,6 @@ void KeywordSearchWidget::showSidebarContextMenu(const QPoint& pos) {
     m_sidebar->setCurrentItem(item);
 
     QMenu menu(this);
-    menu.setWindowFlags(menu.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     menu.setAttribute(Qt::WA_TranslucentBackground);
     
     bool isPinned = item->data(Qt::UserRole + 1).toBool();
