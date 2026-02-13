@@ -140,7 +140,7 @@ QComboBox::drop-down {
 }
 
 QMenu {
-    background-color: #2b2b2b;
+    background-color: rgba(43, 43, 43, 255);
     color: #f0f0f0;
     border: 1px solid #444;
     border-radius: 8px;
