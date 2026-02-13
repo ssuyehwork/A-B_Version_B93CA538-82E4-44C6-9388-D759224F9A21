@@ -276,3 +276,4 @@ void SearchLineEdit::removeHistoryEntry(const QString& text) {
 }
 
 #include "SearchLineEdit.moc"
+#include "SearchLineEdit.moc"

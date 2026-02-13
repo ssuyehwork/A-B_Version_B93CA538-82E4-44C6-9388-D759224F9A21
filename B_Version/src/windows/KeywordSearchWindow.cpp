@@ -1011,3 +1011,4 @@ void KeywordSearchWindow::hideEvent(QHideEvent* event) {
 }
 
 #include "KeywordSearchWindow.moc"
+#include "KeywordSearchWindow.moc"

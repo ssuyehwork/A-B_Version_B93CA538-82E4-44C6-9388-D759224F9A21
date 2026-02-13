@@ -2274,3 +2274,4 @@ void DittoListView::mousePressEvent(QMouseEvent* event) {
 }
 
 #include "QuickWindow.moc"
+#include "QuickWindow.moc"

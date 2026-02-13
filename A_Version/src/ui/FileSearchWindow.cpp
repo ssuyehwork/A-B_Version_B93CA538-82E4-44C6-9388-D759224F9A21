@@ -1263,3 +1263,4 @@ bool FileSearchWindow::eventFilter(QObject* watched, QEvent* event) {
 }
 
 #include "FileSearchWindow.moc"
+#include "FileSearchWindow.moc"

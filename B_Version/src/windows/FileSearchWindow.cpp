@@ -1058,3 +1058,6 @@ void FileSearchWidget::onMergeFiles(const QStringList& filePaths, const QString&
         QString lang = getFileLanguage(fp);
 
         out << "
+#include "FileSearchWindow.moc"
+
+#include "FileSearchWindow.moc"

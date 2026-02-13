@@ -1609,3 +1609,4 @@ void ColorPickerWindow::saveFavorites() {
 }
 
 #include "ColorPickerWindow.moc"
+#include "ColorPickerWindow.moc"
