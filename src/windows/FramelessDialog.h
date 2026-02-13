@@ -71,7 +71,6 @@ private:
     bool m_firstShow = true;
     bool m_isResizing = false;
     ResizeEdge m_resizeEdge = None;
-    const int m_padding = 5; 
 };
 
 #endif // FRAMELESSDIALOG_H

@@ -7,7 +7,7 @@
 SearchAppWindow::SearchAppWindow(QWidget* parent) 
     : FramelessDialog("搜索主程序", parent) 
 {
-    setObjectName("SearchTool_SearchAppWindow");
+    setObjectName("SearchTool_SearchAppWindow_Standalone");
     resize(1100, 750);
     setupStyles();
     initUI();

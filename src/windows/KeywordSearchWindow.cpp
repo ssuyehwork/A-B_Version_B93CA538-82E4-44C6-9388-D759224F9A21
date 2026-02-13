@@ -216,7 +216,7 @@ public:
         if (m_type == Path) key = "pathList";
         else if (m_type == Replace) key = "replaceList";
 
-        QSettings settings("SearchTool", "KeywordSearchHistory");
+        QSettings settings("SearchTool_Standalone", "KeywordSearchHistory");
         settings.setValue(key, QStringList());
     }
 
@@ -225,7 +225,7 @@ public:
         if (m_type == Path) key = "pathList";
         else if (m_type == Replace) key = "replaceList";
 
-        QSettings settings("SearchTool", "KeywordSearchHistory");
+        QSettings settings("SearchTool_Standalone", "KeywordSearchHistory");
         QStringList history = settings.value(key).toStringList();
         history.removeAll(text);
         settings.setValue(key, history);
@@ -236,7 +236,7 @@ public:
         if (m_type == Path) key = "pathList";
         else if (m_type == Replace) key = "replaceList";
 
-        QSettings settings("SearchTool", "KeywordSearchHistory");
+        QSettings settings("SearchTool_Standalone", "KeywordSearchHistory");
         return settings.value(key).toStringList();
     }
 
@@ -636,7 +636,7 @@ void KeywordSearchWidget::addFavorite(const QString& path, bool pinned) {
 }
 
 void KeywordSearchWidget::loadFavorites() {
-    QSettings settings("SearchTool", "KeywordSearchFavorites");
+    QSettings settings("SearchTool_Standalone", "KeywordSearchFavorites");
     QVariant val = settings.value("list");
     if (val.typeId() == QMetaType::QStringList) {
         QStringList oldFavs = val.toStringList();
@@ -672,7 +672,7 @@ void KeywordSearchWidget::saveFavorites() {
         map["pinned"] = m_sidebar->item(i)->data(Qt::UserRole + 1).toBool();
         favs << map;
     }
-    QSettings settings("SearchTool", "KeywordSearchFavorites");
+    QSettings settings("SearchTool_Standalone", "KeywordSearchFavorites");
     settings.setValue("list", favs);
 }
 
@@ -971,7 +971,7 @@ void KeywordSearchWidget::addHistoryEntry(HistoryType type, const QString& text)
     if (type == Path) key = "pathList";
     else if (type == Replace) key = "replaceList";
 
-    QSettings settings("SearchTool", "KeywordSearchHistory");
+    QSettings settings("SearchTool_Standalone", "KeywordSearchHistory");
     QStringList history = settings.value(key).toStringList();
     history.removeAll(text);
     history.prepend(text);
@@ -992,23 +992,4 @@ void KeywordSearchWidget::onShowHistory() {
     popup->showAnimated();
 }
 
-// ----------------------------------------------------------------------------
-// KeywordSearchWindow 实现
-// ----------------------------------------------------------------------------
-KeywordSearchWindow::KeywordSearchWindow(QWidget* parent) : FramelessDialog("搜索关键字", parent) {
-    resize(1000, 700);
-    m_searchWidget = new KeywordSearchWidget(m_contentArea);
-    auto* layout = new QVBoxLayout(m_contentArea);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(m_searchWidget);
-}
-
-KeywordSearchWindow::~KeywordSearchWindow() {
-}
-
-void KeywordSearchWindow::hideEvent(QHideEvent* event) {
-    FramelessDialog::hideEvent(event);
-}
-
-#include "KeywordSearchWindow.moc"
 #include "KeywordSearchWindow.moc"
