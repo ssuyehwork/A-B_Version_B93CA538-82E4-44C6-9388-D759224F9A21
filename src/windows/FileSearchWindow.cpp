@@ -166,8 +166,65 @@ private:
 };
 
 // ----------------------------------------------------------------------------
-// Sidebar ListWidget subclass for Drag & Drop
+// Custom ListWidgets for Drag & Drop
 // ----------------------------------------------------------------------------
+class FileFavoriteListWidget : public QListWidget {
+    Q_OBJECT
+public:
+    explicit FileFavoriteListWidget(QWidget* parent = nullptr) : QListWidget(parent) {
+        setAcceptDrops(true);
+    }
+signals:
+    void filesDropped(const QStringList& paths);
+protected:
+    void dragEnterEvent(QDragEnterEvent* event) override {
+        if (event->mimeData()->hasUrls() || event->mimeData()->hasText()) {
+            event->acceptProposedAction();
+        }
+    }
+    void dragMoveEvent(QDragMoveEvent* event) override {
+        event->acceptProposedAction();
+    }
+    void dropEvent(QDropEvent* event) override {
+        QStringList paths;
+        if (event->mimeData()->hasUrls()) {
+            for (const QUrl& url : event->mimeData()->urls()) {
+                QString p = url.toLocalFile();
+                if (!p.isEmpty()) paths << p;
+            }
+        } else if (event->mimeData()->hasText()) {
+            paths = event->mimeData()->text().split("\n", Qt::SkipEmptyParts);
+        }
+
+        if (!paths.isEmpty()) {
+            emit filesDropped(paths);
+            event->acceptProposedAction();
+        }
+    }
+};
+
+class FileResultListWidget : public QListWidget {
+    Q_OBJECT
+public:
+    using QListWidget::QListWidget;
+protected:
+    QMimeData* mimeData(const QList<QListWidgetItem*>& items) const override {
+        QMimeData* mime = new QMimeData();
+        QList<QUrl> urls;
+        QStringList paths;
+        for (auto* item : items) {
+            QString p = item->data(Qt::UserRole).toString();
+            if (!p.isEmpty()) {
+                urls << QUrl::fromLocalFile(p);
+                paths << p;
+            }
+        }
+        mime->setUrls(urls);
+        mime->setText(paths.join("\n"));
+        return mime;
+    }
+};
+
 class FileSidebarListWidget : public QListWidget {
     Q_OBJECT
 public:
@@ -643,10 +700,12 @@ void FileSearchWidget::initUI() {
     listHeaderLayout->addWidget(btnCopyAll);
     layout->addLayout(listHeaderLayout);
 
-    m_fileList = new QListWidget();
+    m_fileList = new FileResultListWidget();
     m_fileList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_fileList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_fileList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    m_fileList->setDragEnabled(true);
+    m_fileList->setDragDropMode(QAbstractItemView::DragOnly);
     m_fileList->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_fileList, &QListWidget::customContextMenuRequested, this, &FileSearchWidget::showFileContextMenu);
     
@@ -690,11 +749,27 @@ void FileSearchWidget::initUI() {
     rightHeaderLayout->addStretch();
     rightSidebarLayout->addLayout(rightHeaderLayout);
 
-    m_fileFavoritesList = new QListWidget();
+    auto* favList = new FileFavoriteListWidget();
+    m_fileFavoritesList = favList;
     m_fileFavoritesList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_fileFavoritesList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_fileFavoritesList->setMinimumWidth(200);
     m_fileFavoritesList->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(favList, &FileFavoriteListWidget::filesDropped, this, [this](const QStringList& paths){
+        QSettings settings("SearchTool_Standalone", "FileFavorites");
+        QStringList favs = settings.value("list").toStringList();
+        bool changed = false;
+        for (const QString& path : paths) {
+            if (!path.isEmpty() && !favs.contains(path)) {
+                favs.prepend(path);
+                changed = true;
+            }
+        }
+        if (changed) {
+            settings.setValue("list", favs);
+            loadFileFavorites();
+        }
+    });
     connect(m_fileFavoritesList, &QListWidget::customContextMenuRequested, this, &FileSearchWidget::showFileFavoriteContextMenu);
     connect(m_fileFavoritesList, &QListWidget::itemDoubleClicked, this, [](QListWidgetItem* item){
         QString path = item->data(Qt::UserRole).toString();
