@@ -5,7 +5,7 @@
 #include <QVBoxLayout>
 
 SearchAppWindow::SearchAppWindow(QWidget* parent) 
-    : FramelessDialog("搜索主程序", parent) 
+    : FramelessDialog("查找文件", parent) 
 {
     setObjectName("SearchTool_SearchAppWindow_Standalone");
     resize(1100, 750);

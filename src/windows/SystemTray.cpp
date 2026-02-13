@@ -8,11 +8,12 @@ SystemTray::SystemTray(QObject* parent) : QObject(parent) {
     
     // 使用应用图标作为托盘图标
     m_trayIcon->setIcon(QIcon(":/icons/app_icon.ico"));
-    m_trayIcon->setToolTip("搜索主程序");
+    m_trayIcon->setToolTip("查找文件");
 
     m_menu = new QMenu();
-    m_menu->setWindowFlags(m_menu->windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
+    m_menu->setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     m_menu->setAttribute(Qt::WA_TranslucentBackground);
+    m_menu->setAttribute(Qt::WA_NoSystemBackground);
     
     m_menu->addAction(IconHelper::getIcon("search", "#aaaaaa", 18), "打开搜索窗口", this, &SystemTray::showWindow);
     m_menu->addSeparator();

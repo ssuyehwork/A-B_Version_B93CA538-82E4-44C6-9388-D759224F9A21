@@ -141,6 +141,7 @@ public:
         m_edit = edit;
         m_type = type;
         setAttribute(Qt::WA_TranslucentBackground);
+        setAttribute(Qt::WA_NoSystemBackground);
         
         auto* rootLayout = new QVBoxLayout(this);
         rootLayout->setContentsMargins(12, 12, 12, 12);
@@ -599,8 +600,9 @@ void KeywordSearchWidget::showSidebarContextMenu(const QPoint& pos) {
     m_sidebar->setCurrentItem(item);
 
     QMenu menu(this);
-    menu.setWindowFlags(menu.windowFlags() | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
+    menu.setWindowFlags(Qt::Popup | Qt::FramelessWindowHint | Qt::NoDropShadowWindowHint);
     menu.setAttribute(Qt::WA_TranslucentBackground);
+    menu.setAttribute(Qt::WA_NoSystemBackground);
     
     bool isPinned = item->data(Qt::UserRole + 1).toBool();
     QAction* pinAct = menu.addAction(IconHelper::getIcon("pin_vertical", isPinned ? "#007ACC" : "#AAA"), isPinned ? "取消置顶" : "置顶文件夹");
